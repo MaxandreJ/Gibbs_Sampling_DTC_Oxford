@@ -184,8 +184,14 @@ function [ background ] = compute_background(seqs)
 % frequencies of each base in the sequences, and to use
 % these as the background.
 
-    background = ones(4,1);
-    background = background / 4;
+    background = zeros(4,1);
+    for i=1:length(seqs)
+      seq = seqs{i};
+      for j=1:length(seq)
+        background(seq(j)) = background(seq(j)) + 1;
+      end
+    end
+    background = background / sum(background);
 
 end
 
@@ -197,7 +203,7 @@ for i=1:length(seqs)
   if z(i)==1
     for k=1:K
       j=k+s(i)-1;
-      f(seq[j],k) = f(seq[j],k) + 1;
+      f(seq(j),k) = f(seq(j),k) + 1;
     end
   end
   for k=1:K
