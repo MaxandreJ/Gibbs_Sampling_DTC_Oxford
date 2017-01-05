@@ -50,7 +50,6 @@ z = ones(nseqs,1);
 Z = ones(nseqs,n_iterations-1);
 % This matrix (with the capitalised name) stores the value of
 % z for each iteration of the simulation, for analysis purposes.
-
 mu = mu_start;
 % The probability of each sequence containing a motif
 Mu = ones(n_iterations,1);
@@ -184,24 +183,38 @@ function [ background ] = compute_background(seqs)
 % frequencies of each base in the sequences, and to use
 % these as the background.
 
-    background = ones(4,1);
-    background = background / 4;
+  %  background = ones(4,1);
+  %  background = background / 4;
+    
+    
+        background = zeros(4,1);
+    for i=1:length(seqs)
+      seq = seqs{i};
+      for j=1:length(seq)
+        background(seq(j)) = background(seq(j)) + 1;
+      end
+    end
+background = background / sum(background);
 
 end
 
 function [ M ] = sample_M(seqs,K,z,s,alpha)
 f = zeros(4,K);
-M = zeros(4,k);
+M = zeros(4,K);
+% for each sequence
 for i=1:length(seqs)
   seq = seqs{i};
+  % if I found the motif
   if z(i)==1
+      % for each position in sequence
     for k=1:K
       j=k+s(i)-1;
-      f(seq[j],k) = f(seq[j],k) + 1;
+      % add one occurrence to the occurrence count
+      f(seq(j),k) = f(seq(j),k) + 1;
     end
   end
   for k=1:K
-    M(:,k) = dirichrnd(alpha+f(:,k));
+    M(:,k) = dirichrnd(alpha+f(:,k)');
   end
 end
 
@@ -219,6 +232,14 @@ function [ likelihood_ratio, s_i ] =  sample_s(prob,background_prob,mu)
 % If this function returns s_i = 0, it means that sequence i
 % does not contain a copy of the motif.
 
+likelihood_ratio = prob./background_prob;
+
+v = 1:length(prob);
+
+s_i = randsample(v, likelihood_ratio); 
+
+likelihood_ratio = likelihood_ratio(s_i);
+
 end
 
 function [ mu ] = sample_mu(z,beta)
@@ -232,9 +253,9 @@ function [ p ] = likelihood(sequence,s_i,M,K)
 % beginning at s_i according to the model specified by M
 
 %rasa
-	n = s_i;
-		for (j = n:n+K-1)
-      			p(j) = M(j);
+		p=1;
+		for (j = s_i:s_i+K-1)
+			p = p*M(sequence(j),j-s_i+1);
 		end
 
 
