@@ -233,4 +233,11 @@ function [ p ] = likelihood(sequence,s_i,M,K)
 % Computes the likelihood of a subsequence of length K,
 % beginning at s_i according to the model specified by M
 
+%rasa
+	n = s_i;
+		for (j = n:n+K-1)
+      			p(j) = M(j);
+		end
+
+
 end
