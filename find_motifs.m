@@ -183,18 +183,17 @@ function [ background ] = compute_background(seqs)
 % frequencies of each base in the sequences, and to use
 % these as the background.
 
-  %  background = ones(4,1);
-  %  background = background / 4;
-    
-    
-        background = zeros(4,1);
+    background = zeros(4,1);
+
     for i=1:length(seqs)
       seq = seqs{i};
       for j=1:length(seq)
         background(seq(j)) = background(seq(j)) + 1;
       end
     end
-background = background / sum(background);
+
+    background = background / sum(background);
+
 
 end
 
@@ -209,6 +208,7 @@ for i=1:length(seqs)
       % for each position in sequence
     for k=1:K
       j=k+s(i)-1;
+
       % add one occurrence to the occurrence count
       f(seq(j),k) = f(seq(j),k) + 1;
     end
@@ -245,7 +245,9 @@ end
 function [ mu ] = sample_mu(z,beta)
 % Samples mu from its full conditional, given the current values
 % for z, and the prior parameters, beta.
-
+a=beta(1)+sum(z);
+b=beta(2)+nseqs-sum(z);
+mu=betarnd(a,b);
 end
 
 function [ p ] = likelihood(sequence,s_i,M,K)
