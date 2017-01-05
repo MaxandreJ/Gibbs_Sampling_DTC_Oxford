@@ -224,7 +224,9 @@ end
 function [ mu ] = sample_mu(z,beta)
 % Samples mu from its full conditional, given the current values
 % for z, and the prior parameters, beta.
-
+a=beta(1)+sum(z);
+b=beta(2)+nseqs-sum(z);
+mu=betarnd(a,b);
 end
 
 function [ p ] = likelihood(sequence,s_i,M,K)
