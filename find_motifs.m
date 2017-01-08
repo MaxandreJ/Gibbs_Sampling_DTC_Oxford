@@ -262,10 +262,14 @@ function [ p ] = likelihood(sequence,s_i,M,K)
 % Computes the likelihood of a subsequence of length K,
 % beginning at s_i according to the model specified by M
 
-%rasa
 		p=1;
-		for (j = s_i:s_i+K-1)
-			p = p*M(sequence(j),j-s_i+1);
+		
+		for (j = s_i:s_i+K-1) % from the starting point of the motif to its end
+		
+			p = p*M(sequence(j),j-s_i+1); 
+			% multiply p by the probability of the nucleotide 'sequence(j)' being at position
+			% 'j-s_i+1'. When j=s_i, j-s_i+1 = 1, which is good because 
+			% the columns of the matrix start at 1
 		end
 
 
