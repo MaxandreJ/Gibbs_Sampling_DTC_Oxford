@@ -4,14 +4,14 @@ function prob = felsenstein_likelihood(seq,start_positions,k,p)
 % Joe Herman <herman@stats.ox.ac.uk>
 % Adam Novak <novak@stats.ox.ac.uk>
 % with thanks to Andreas Harris <andreas.harris@exeter.ox.ac.uk>
-        
+
 % Tree represented as
 %            1
 %     0.1 /     \0.3
 %      2          3
 % 0.4/  \0.2  0.2/  \0.14
 %   4    5      6    7
-% 
+%
 % Tree = { [0.1 0.3] [0.4 0.2] [0.2 0.14] };
 % Children = { [2 3] [4 5] [6 7] };
 
@@ -26,7 +26,7 @@ Children = { [6 2] [3 4] [7 5] [10 11] [8 9] };
 
 nseqs = length(seq);
 column = zeros(nseqs,1);
-for (i = 1:nseqs) 
+for (i = 1:nseqs)
     % select the relevant bits of the sequences as specified by
     % start_positions
     column(i) = seq{i}(start_positions(i)+k-1);
@@ -36,7 +36,7 @@ end
 Q = [p; p; p; p];
 Q = Q - diag(diag(Q));
 Q = Q - diag(sum(Q'));
-[V,D] = eig(Q); 
+[V,D] = eig(Q);
 D = diag(D);
 Vinv = inv(V);
 
@@ -51,7 +51,7 @@ function [ x ] = fels(i)
     if (i >= nseqs)
         x = zeros(4,1);
         x(column(i-nseqs+1)) = 1;
-    else      
+    else
         x = ((V * diag(exp(Tree{i}(1) * D)) * Vinv) * fels(Children{i}(1))) .* ...
         ((V * diag(exp(Tree{i}(2) * D)) * Vinv) * fels(Children{i}(2)));
     end

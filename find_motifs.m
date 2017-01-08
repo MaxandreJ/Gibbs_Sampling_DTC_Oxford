@@ -1,7 +1,7 @@
-function [ Z, S, mu, ...
+function [ Z, S, mu, max_lr, min_ent, ...
            min_ent_M, min_ent_s, ...
            max_lr_M,max_lr_s, ...
-           posterior_mean_M, information ]  = find_motifs(sequence_file,K, ...
+           posterior_mean_M, information,background ]  = find_motifs(sequence_file,K, ...
                                                       n_iterations,burn_in, ...
                                                       a, mu_start, mu_unknown, beta)
 % This code will run the Gibbs sampler motif detection algorithm of
@@ -132,7 +132,7 @@ for (iter = 1:n_iterations)
         end
 
         % Now sample a new start position from the full conditional
-        [likelihood_ratio, s(i)] = sample_s(prob,background_prob,mu(iter));
+        [likelihood_ratio, s(i)] = sample_s(prob,background_prob,mu(iter),K);
         % NB if a zero is sampled, it corresponds to the motif not being
         % present in this particular sequence.
 
@@ -220,7 +220,7 @@ end
 
 end
 
-function [ likelihood_ratio, s_i ] =  sample_s(prob,background_prob,mu)
+function [ likelihood_ratio, s_i ] =  sample_s(prob,background_prob,mu,K)
 % 'prob' and 'background_prob' are vectors containing the
 % probability of the motif starting at each possible site
 % from 1 to L_i - K + 1 in sequence i, under the motif model M,
@@ -231,14 +231,22 @@ function [ likelihood_ratio, s_i ] =  sample_s(prob,background_prob,mu)
 % likelihood ratio.
 % If this function returns s_i = 0, it means that sequence i
 % does not contain a copy of the motif.
+L = length(prob);
 
 likelihood_ratio = prob./background_prob;
 
-v = 1:length(prob);
+probz=(L-K+1)*(1-mu)/((L-K+1)*(1-mu)+mu*sum(likelihood_ratio));
 
-s_i = randsample(v, likelihood_ratio); 
+if (randn(1) < probz)
+  s_i=0;
+  likelihood_ratio = 1;
+else
+  v = 1:length(prob);
 
-likelihood_ratio = likelihood_ratio(s_i);
+  s_i = randsample(v, likelihood_ratio);
+
+  likelihood_ratio = likelihood_ratio(s_i);
+end
 
 end
 
