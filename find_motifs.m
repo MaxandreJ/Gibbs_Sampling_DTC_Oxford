@@ -4,6 +4,7 @@ function [ Z, S, mu, max_lr, min_ent, ...
            posterior_mean_M, information,background ]  = find_motifs(sequence_file,K, ...
                                                       n_iterations,burn_in, ...
                                                       a, mu_start, mu_unknown, beta)
+
 % This code will run the Gibbs sampler motif detection algorithm of
 % Lawrence et al. (1993) on a set of sequences inputted as a FASTA file.
 %
@@ -104,7 +105,7 @@ for (iter = 1:n_iterations)
         % Store the previous value of the starting positins
 
         if (mu_unknown)
-            mu(iter) = sample_mu(z,beta);
+            mu(iter) = sample_mu(z,beta,nseqs);
         else
             mu(iter) = mu(iter-1);
         end
@@ -235,9 +236,9 @@ L = length(prob);
 
 likelihood_ratio = prob./background_prob;
 
-probz=(L-K+1)*(1-mu)/((L-K+1)*(1-mu)+mu*sum(likelihood_ratio));
+prob_z=(L-K+1)*(1-mu)/((L-K+1)*(1-mu)+mu*sum(likelihood_ratio));
 
-if (randn(1) < probz)
+if (randn(1) < prob_z)
   s_i=0;
   likelihood_ratio = 1;
 else
@@ -250,9 +251,11 @@ end
 
 end
 
-function [ mu ] = sample_mu(z,beta)
+function [ mu ] = sample_mu(z,beta,nseqs)
 % Samples mu from its full conditional, given the current values
 % for z, and the prior parameters, beta.
+
+% Matlab lists are 1-based so beta(1) = beta(0) on the instructions
 a=beta(1)+sum(z);
 b=beta(2)+nseqs-sum(z);
 mu=betarnd(a,b);
@@ -263,12 +266,12 @@ function [ p ] = likelihood(sequence,s_i,M,K)
 % beginning at s_i according to the model specified by M
 
 		p=1;
-		
+
 		for (j = s_i:s_i+K-1) % from the starting point of the motif to its end
-		
-			p = p*M(sequence(j),j-s_i+1); 
+
+			p = p*M(sequence(j),j-s_i+1);
 			% multiply p by the probability of the nucleotide 'sequence(j)' being at position
-			% 'j-s_i+1'. When j=s_i, j-s_i+1 = 1, which is good because 
+			% 'j-s_i+1'. When j=s_i, j-s_i+1 = 1, which is good because
 			% the columns of the matrix start at 1
 		end
 

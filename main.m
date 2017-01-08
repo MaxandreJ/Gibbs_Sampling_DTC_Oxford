@@ -8,7 +8,7 @@ n_iterations= 200;
 burn_in= 100;
 a = 1;
 mu_start = 1;
-mu_unknown = 0;
+mu_unknown = 1;
 beta= [1,1];
 
 % Find the motifs by running the Gibbs sampler
