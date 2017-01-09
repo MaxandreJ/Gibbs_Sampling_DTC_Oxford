@@ -3,21 +3,50 @@
 
 % Set parameters
 sequence_file= 'data/data1.fasta';
-K= 11;
-n_iterations= 200;
-burn_in= 100;
+K= 12;
+n_iterations= 1000;
+burn_in= 200;
 a = 1;
 mu_start = 1;
-mu_unknown = 1;
+mu_unknown = 0;
 beta= [1,1];
 
 % Find the motifs by running the Gibbs sampler
-[ Z, S, mu, max_lr, min_ent, ...
-           min_ent_M, min_ent_s, ...
-           max_lr_M,max_lr_s, ...
-           posterior_mean_M, information,background ]  = find_motifs(sequence_file,K, ...
-                                                      n_iterations,burn_in, ...
-                                                      a, mu_start, mu_unknown, beta)
+
+max_lrs= [];
+min_ents=[];
+min_ent_Ms = {};
+max_lr_Ms = {};
+posterior_mean_Ms = {};
+informations = {};
+% for K=5:15
+for a=[0.1]%[0.05, 0.1, 0.2, 1, 2, 15]
+
+
+  [ Z, S, mu, max_lr, min_ent, ...
+             min_ent_M, min_ent_s, ...
+             max_lr_M,max_lr_s, ...
+             posterior_mean_M, information,background ]  = find_motifs(sequence_file,K, ...
+                                                        n_iterations,burn_in, ...
+                                                        a, mu_start, mu_unknown, beta)
+
+  max_lrs = [max_lrs max_lr*(1/4)^(K+K-5)];
+  min_ents = [min_ents min_ent];
+  min_ent_Ms =[min_ent_Ms; {min_ent_M}];
+  max_lr_Ms  = [max_lr_Ms; {max_lr_M}];
+  posterior_mean_Ms  = [posterior_mean_Ms; {posterior_mean_M}];
+  informations  = [informations; {information}];
+
+  % figure();
+  seqlogo_fig1(max_lr_M)
+
+  % Display the average information per site as a function of iterations
+  figure();
+  plot(information)
+  title(['Information a=', num2str(a)])
+  ylabel('Average information per site')
+  xlabel('Iteration')
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % NOTES ON ARGUMENTS
@@ -39,8 +68,23 @@ beta= [1,1];
 
 %% Display the results
 % Display the M for which the likelihood ratio is maximal
-seqlogo_fig1(max_lr_M)
-% Display the average information per site as a function of iterations
-plot(information)
-ylabel('Average information per site')
-xlabel('Iteration')
+
+% seqlogo_fig1(max_lr_M)
+% % Display the average information per site as a function of iterations
+% plot(information)
+% ylabel('Average information per site')
+% xlabel('Iteration')
+
+%% Task 1. done
+%%% Sequence logo graph for mean and max likelihood.
+%%% convergence
+%%% a sweep
+%%%% plot convergences, and lr, ents.
+
+%% Task 2. See data2results.
+%%%
+%% Task 3. Learning mu.
+
+%% Task 4. Phylogenetic information.
+
+%% Task 5.

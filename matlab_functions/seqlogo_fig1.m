@@ -24,25 +24,25 @@ function W = seqlogo_fig1(P, varargin)
 %   SEQLOGO(...,'ENDAT',ENDPOSITION) specifies the position for the
 %   sites of interest in SEQS. The default ending position is the maximum
 %   length in SEQS.
-% 
+%
 %   SEQLOGO(...,'SSCORRECTION',false) specifies not to apply the small
 %   sample correction. When there are only a few sample sequences a
 %   straightforward calculation tends to overestimate the conservation. By
 %   default SEQLOGO compensates by applying an approximate correction based
 %   on the number of sequences. This correction is negligible more than
 %   50 sequences are used.
-% 
+%
 %   SEQLOGO(P) displays a sequence logo for P, a sequence profile generated
 %   by SEQPROFILE. P is a matrix of size [20 x seq Length] with the
-%   frequency distribution of amino acids. For nucleotides, P is of size 
+%   frequency distribution of amino acids. For nucleotides, P is of size
 %   [4 x seq Length] and the DNA alphabet is assumed. P may have 21 (or 5)
 %   rows if gaps were included, but SEQLOGO ignores gaps. The sequence
 %   conservation is computed without small sample correction. When P
 %   contains weighted profiles or symbols counts the profile columns are
 %   normalized to the maximum column sum of the profile.
-% 
+%
 %   Example:
-% 
+%
 %       S = {'ATTATAGCAAACTA',...
 %            'AACATGCCAAAGTA',...
 %            'ATCATGCAAAAGGA'}
@@ -53,22 +53,22 @@ function W = seqlogo_fig1(P, varargin)
 %       % columns with information equal to log2(4) = 2 bits, however you
 %       % can also turn this adjustment off:
 %       seqlogo(S,'sscorrection',false)
-% 
+%
 %       % Amino acid sequences
-%       S1 = {'LSGGQRQRVAIARALAL'; 
-%             'LSGGEKQRVAIARALMN'; 
+%       S1 = {'LSGGQRQRVAIARALAL';
+%             'LSGGEKQRVAIARALMN';
 %             'LSGGQIQRVLLARALAA';
-%             'LSGGERRRLEIACVLAL'; 
-%             'FSGGEKKKNELWQMLAL'; 
+%             'LSGGERRRLEIACVLAL';
+%             'FSGGEKKKNELWQMLAL';
 %             'LSGGERRRLEIACVLAL'};
 %       seqlogo(S1, 'alphabet', 'aa', 'startAt', 2, 'endAt', 10)
-% 
+%
 %   Reference:
-% 
+%
 %       Schneider, T.D., Stephens, R.M., "Sequence Logos: A New Way to
 %       Display Consensus Sequences," Nucleic Acids Research, 18, pp.
-%       6097-6100, 1990. 
-% 
+%       6097-6100, 1990.
+%
 %   See also SEQCONSENSUS, SEQDISP, SEQPROFILE.
 
 %   SEQLOGO(...,'TOFILE',FILENAME) saves the sequence logo in PNG format
@@ -89,7 +89,7 @@ endPos = 1;
 isAA = false;
 NTFlag = false;
 displayLogo = true;
-nSymbols = 4; % number of symbols in alphabet for NT, 20 for AA 
+nSymbols = 4; % number of symbols in alphabet for NT, 20 for AA
 fileName = []; % a default file name
 fileExt = 'png';     % Image file extension
 corrError = true;
@@ -106,7 +106,7 @@ if nargin > 1
     for j=1:2:nargin-2
         pname = varargin{j};
         pval = varargin{j+1};
-        k = find(strncmpi(pname, okargs,numel(pname))); 
+        k = find(strncmpi(pname, okargs,numel(pname)));
         if isempty(k)
             error('Bioinfo:seqlogo:UnknownParameterName',...
                 'Unknown parameter name: %s.',pname);
@@ -137,7 +137,7 @@ if nargin > 1
                     else
                         startPos = pval;
                     end
-                    
+
                 case 3  % end position
                     if ~isnumeric(pval) || ~isscalar(pval)
                         error('Bioinfo:seqlogo:EndAtNotSingleNumericValue',...
@@ -212,18 +212,18 @@ else % P has sequences that may include ambiguous symbols
     end
     seqs = upper(P);
     [numSeq, nPos] = size(seqs);
-    
+
     % Create a profile count matrix  column: - positions
     % row:    - number of unique characters
     uniqueList = unique(seqs);
-    
+
     if ~isAA && ~isnt(uniqueList) && ~NTFlag
-        warning('Bioinfo:seqlogo:AmbigiousSequenceAlphabet',...       
+        warning('Bioinfo:seqlogo:AmbigiousSequenceAlphabet',...
             ['The alphabet type of the input sequence may not be nucleotide.',...
-              '\nResults being displayed as the default alphabet type nucleotides.',...  
+              '\nResults being displayed as the default alphabet type nucleotides.',...
              '\nIf sequence is amino acids please specify the alphabet type.']);
     end
-    
+
     m = length(uniqueList);
     pcM = zeros(m, nPos);
     for i = 1:nPos
@@ -231,7 +231,7 @@ else % P has sequences that may include ambiguous symbols
             pcM(j,i) = sum(seqs(:,i) == uniqueList(j));
         end
     end
-    
+
     % Compute the weight matrix used for graphically displaying the logo
     % Not considering wild card or gap YET, only for real symbols
     freqM = [];
@@ -270,7 +270,7 @@ end
 % == Compute the weight matrix used for graphically displaying the logo.
 % Not considering wild card or gap YET, only for real symbols
 freqM = freqM(:, startPos:endPos);
-wtM = freqM; 
+wtM = freqM;
 if isAA
     nSymbols = 20;
 end
@@ -341,13 +341,13 @@ if nargin == 4 % Pass in weight Matrix, list of symbols and isAA
     wtMatrix = varargin{1};
     symbols = varargin{2};
     isAA = varargin{3};
-    startPos = varargin{4}; 
+    startPos = varargin{4};
 elseif nargin == 5 % Pass in weight Matrix, list of symbols, isAA and filename
     saveLogo = true;%#ok!
     wtMatrix = varargin{1};
     symbols = varargin{2};
     isAA = varargin{3};
-    startPos = varargin{4}; 
+    startPos = varargin{4};
     filename = varargin{5};%#ok!
 end
 
@@ -376,7 +376,7 @@ hFigure = figure( ...
             'HandleVisibility', 'Callback',...
             'visible', 'off',...
             'DeleteFcn', {@onLogoClosing, logoViewer, logoContainer});
-        
+
 initFigureTools(hFigure, logoViewer)
 
 % Set the figure widow size to fit the scrollPane
@@ -401,7 +401,7 @@ end
 %----------------------------------------------------------------------%
 function saveHandler(hsrc, event, logoViewer) %#ok
 awtinvoke(logoViewer, 'saveLogoDialog()')
-     
+
 %----------------------------------------------------------------------%
 function onLogoClosing(hfig, event, logoViewer, logoContainer)%#ok
 if ~isempty(logoViewer)
@@ -415,7 +415,7 @@ function initFigureTools(fig, logoViewer)
 oldSH = get(0,'ShowHiddenHandles');
 set(0,'ShowHiddenHandles','on')
 
-% Handle toolbar 
+% Handle toolbar
 toolbarHandle = uitoolbar('parent', fig);
 hSave = uitoolfactory(toolbarHandle, 'Standard.SaveFigure');
 set(hSave,  'ClickedCallback', {@saveHandler, logoViewer}, 'tooltip', 'Export Logo Image');
@@ -449,7 +449,7 @@ delete(get(hw,'children'));
 uimenu(hw,'Label','Bioinformatics Toolbox Help','Position',1,'Callback',...
        'web([docroot ''/toolbox/bioinfo/bioinfo_product_page.html''])')
 uimenu(hw,'Label','Demos','Position',2,'Separator','on',...
-       'Callback','demo(''toolbox'',''bioinfo'')')   
+       'Callback','demo(''toolbox'',''bioinfo'')')
 tlbx = ver('bioinfo');
 mailstr = ['web(''mailto:bioinfofeedback@mathworks.com?subject=',...
            'Feedback%20for%20SeqLogo%20in%20Bioinformatics',...
