@@ -37,13 +37,21 @@ for a=[0.1]%[0.05, 0.1, 0.2, 1, 2, 15]
   posterior_mean_Ms  = [posterior_mean_Ms; {posterior_mean_M}];
   informations  = [informations; {information}];
 
-  % figure();
-  seqlogo_fig1(max_lr_M)
+  % figure();,
+  [figure_handle,~] = seqlogo_fig1(max_lr_M);
+  figure_handle.Name = ['a =', num2str(a),', K =', num2str(K),...
+      ', burn_in =', num2str(burn_in), ', n_iterations =', num2str(n_iterations), ...
+      ', mu_start =', num2str(mu_start), ', mu_unknown =', num2str(mu_unknown), ...
+      ', sequence_file =', sequence_file, ', beta =', num2str(beta)];
+  
 
   % Display the average information per site as a function of iterations
   figure();
   plot(information)
-  title(['Information a=', num2str(a)])
+  title(['Parameter values: a =', num2str(a),', K =', num2str(K),...
+      ', burn\_in =', num2str(burn_in), ', n\_iterations =', num2str(n_iterations), ...
+      ', mu\_start =', num2str(mu_start), ', mu\_unknown =', num2str(mu_unknown), ...
+      ', sequence\_file =', sequence_file, ', beta =', num2str(beta)]);
   ylabel('Average information per site')
   xlabel('Iteration')
 end

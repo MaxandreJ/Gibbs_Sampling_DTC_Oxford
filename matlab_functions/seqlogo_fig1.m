@@ -1,4 +1,4 @@
-function W = seqlogo_fig1(P, varargin)
+function [hFigure,W] = seqlogo_fig1(P, varargin)
 %SEQLOGO displays sequence logos for DNA and protein sequences
 %
 %   SEQLOGO(SEQS) displays the sequence logo for a set of aligned sequences,
@@ -294,7 +294,7 @@ for i =1:nPos
     wtM(:, i) = wtM(:, i) * R(i);
 end
 
-if nargout == 1
+if nargout == 2
      % Create the seqLogo cell array
     W = cell(1,2);
     W(1,1) = {symbolList};
@@ -309,9 +309,9 @@ end
 if displayLogo
     wtM (wtM < 0) = 0;
     if ~isempty(fileName)  % Save a image file
-        seqshowlogo(wtM, symbolList, isAA, startPos, fileName);
+        hFigure = seqshowlogo(wtM, symbolList, isAA, startPos, fileName);
     else
-        seqshowlogo(wtM, symbolList, isAA, startPos);
+        hFigure = seqshowlogo(wtM, symbolList, isAA, startPos);
     end
 end
 
@@ -327,7 +327,7 @@ for i = 1:size(weight, 2)
 end
 
 %--------------------------------------------------------------------%
-function seqshowlogo(varargin)
+function hFigure = seqshowlogo(varargin)
 %SEQSHOWLOGO displays a Java seqlogo frame in a figure window
 isAA = false;
 seqType = 'NT';
