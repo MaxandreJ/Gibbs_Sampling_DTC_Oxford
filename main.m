@@ -2,12 +2,12 @@
 %%% all the time...)
 
 % Set parameters
-sequence_file= 'data/data1.fasta';
-K= 12;
-n_iterations= 1000;
-burn_in= 200;
+sequence_file= 'data/data3.fasta';
+K= 10;
+n_iterations= 500;
+burn_in= 100;
 a = 1;
-mu_start = 1;
+mu_start = 0.3;
 mu_unknown = 0;
 beta= [1,1];
 
@@ -20,7 +20,7 @@ max_lr_Ms = {};
 posterior_mean_Ms = {};
 informations = {};
 % for K=5:15
-for a=[0.1]%[0.05, 0.1, 0.2, 1, 2, 15]
+for a=[a]%[0.05, 0.1, 0.2, 1, 2, 15]
 
 
   [ Z, S, mu, max_lr, min_ent, ...
@@ -43,7 +43,7 @@ for a=[0.1]%[0.05, 0.1, 0.2, 1, 2, 15]
       ', burn_in =', num2str(burn_in), ', n_iterations =', num2str(n_iterations), ...
       ', mu_start =', num2str(mu_start), ', mu_unknown =', num2str(mu_unknown), ...
       ', sequence_file =', sequence_file, ', beta =', num2str(beta)];
-  
+
 
   % Display the average information per site as a function of iterations
   figure();
@@ -54,8 +54,11 @@ for a=[0.1]%[0.05, 0.1, 0.2, 1, 2, 15]
       ', sequence\_file =', sequence_file, ', beta =', num2str(beta)]);
   ylabel('Average information per site')
   xlabel('Iteration')
+  % plot(mu)
+  % xlabel('iteration')
+  % ylabel('\mu')
+  % spy(Z)
 end
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % NOTES ON ARGUMENTS
 %
