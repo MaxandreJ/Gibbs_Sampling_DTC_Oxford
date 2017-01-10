@@ -1,7 +1,7 @@
 function [ Z, S, mu, max_lr, min_ent, ...
            min_ent_M, min_ent_s, ...
            max_lr_M,max_lr_s, ...
-           posterior_mean_M, information,background ]  = find_motifs(sequence_file,K, ...
+           posterior_mean_M, information,background ]  = find_motifs_phylo(sequence_file,K, ...
                                                       n_iterations,burn_in, ...
                                                       a, mu_start, mu_unknown, beta)
 
@@ -92,7 +92,7 @@ posterior_mean_M = zeros(4,K);
 background_M = repmat(background,1,K);
 % This is a background PWM derived from the inputted background
 % frequencies.
-
+M=sample_M(seqs,K,z,s,alpha); %initial M
 for (iter = 1:n_iterations)
     if (mod(iter,10)==0) % Every ten iterations
         iter
@@ -114,10 +114,25 @@ for (iter = 1:n_iterations)
 
         L_i = length(seqs{i});
 
-        M = sample_M(seqs,K,z,s,alpha);
+        M_new = sample_M(seqs,K,z,s,alpha);
         % Compute the current PWM for the motif from all sequences.
         % M will be a 4 x K array giving the probability of
         % each base at each location along the motif.
+
+        % compute the probability ratio needed for Metropolis-Hastings part of algo (see nihms paper)
+        f = get_counts(seqs,K,z,s,alpha);
+        ratio = 1;
+        for kk=1:K
+          ratio=ratio*(felsenstein_likelihood(seqs,s,kk,M_new(:,kk)')/felsenstein_likelihood(seqs,s,kk,M(:,kk)'));
+          for nuc=1:4
+            ratio=ratio*(M(nuc,kk)^f(nuc,kk)/M_new(nuc,kk)^f(nuc,kk));
+          end
+        end
+
+        rr = rand(1);
+        if (rr < min(1,ratio))
+          M = M_new;
+        end
 
         prob = zeros(L_i-K+1,1);
         background_prob = zeros(L_i-K+1,1);
@@ -198,28 +213,33 @@ function [ background ] = compute_background(seqs)
 
 end
 
-function [ M ] = sample_M(seqs,K,z,s,alpha)
-f = zeros(4,K);
-M = zeros(4,K);
-% for each sequence
-for i=1:length(seqs)
-  seq = seqs{i};
-  % if I found the motif
-  if z(i)==1
+function f = get_counts(seqs,K,z,s,alpha)
+  f = zeros(4,K);
+  % for each sequence
+  for i=1:length(seqs)
+    seq = seqs{i};
+    % if I found the motif
+    if z(i)==1
       % for each position in sequence
-    for k=1:K
-      j=k+s(i)-1;
+      for k=1:K
+        j=k+s(i)-1;
 
-      % add one occurrence to the occurrence count
-      f(seq(j),k) = f(seq(j),k) + 1;
+        % add one occurrence to the occurrence count
+        f(seq(j),k) = f(seq(j),k) + 1;
+      end
     end
   end
 end
+
+function [ M ] = sample_M(seqs,K,z,s,alpha)
+f = get_counts(seqs,K,z,s,alpha);
+M = zeros(4,K);
 for k=1:K
   M(:,k) = dirichrnd(alpha+f(:,k)');
 end
 
 end
+
 
 function [ likelihood_ratio, s_i ] =  sample_s(prob,background_prob,mu,K)
 % 'prob' and 'background_prob' are vectors containing the
@@ -237,8 +257,8 @@ L = length(prob);
 likelihood_ratio = prob./background_prob;
 
 prob_z=(L-K+1)*(1-mu)/((L-K+1)*(1-mu)+mu*sum(likelihood_ratio));
-
-if (randn(1) < prob_z)
+r = rand(1);
+if (r < prob_z)
   s_i=0;
   likelihood_ratio = 1;
 else
