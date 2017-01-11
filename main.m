@@ -3,13 +3,13 @@
 
 % Set parameters
 sequence_file= 'data/data3.fasta';
-K= 10;
-n_iterations= 500;
-burn_in= 100;
-a = 1;
-mu_start = 0.3;
-mu_unknown = 0;
-beta= [1,1];
+K= 13;
+n_iterations= 10000;
+burn_in= 2000;
+a = 0.1;
+mu_start = 0.5;
+mu_unknown = 1;
+beta= [2,4];
 
 % Find the motifs by running the Gibbs sampler
 
@@ -38,7 +38,7 @@ for a=[a]%[0.05, 0.1, 0.2, 1, 2, 15]
   informations  = [informations; {information}];
 
   % figure();,
-  [figure_handle,~] = seqlogo_fig1(max_lr_M);
+  [figure_handle,~] = seqlogo_fig1(posterior_mean_M);
   figure_handle.Name = ['a =', num2str(a),', K =', num2str(K),...
       ', burn_in =', num2str(burn_in), ', n_iterations =', num2str(n_iterations), ...
       ', mu_start =', num2str(mu_start), ', mu_unknown =', num2str(mu_unknown), ...
