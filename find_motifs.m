@@ -238,7 +238,7 @@ likelihood_ratio = prob./background_prob;
 
 prob_z=(L-K+1)*(1-mu)/((L-K+1)*(1-mu)+mu*sum(likelihood_ratio));
 
-if (randn(1) < prob_z)
+if (rand(1) < prob_z)
   s_i=0;
   likelihood_ratio = 1;
 else
