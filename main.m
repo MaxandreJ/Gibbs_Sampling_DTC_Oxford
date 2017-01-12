@@ -10,7 +10,7 @@ burn_in= 1000;
 % a = 0.1;
 mu_start = 0.8;
 mu_unknown = 1;
-beta= [1,1];
+beta= [2,4];
 
 
 % Find the motifs by running the Gibbs sampler
@@ -22,12 +22,12 @@ max_lr_Ms = {};
 posterior_mean_Ms = {};
 informations = {};
 
-for mu_start = [0.8]
+for mu_start = 0.8%[0.3, 0.5, 0.8, 1]
 for K=[18]
 
 % for K=5:15
-for a=[0.1] %a=[0.05, 0.1, 0.2, 1, 2, 15]
 
+for a=[0.05, 0.1, 0.2, 1, 2, 15]
 
   [ Z, S, mu, max_lr, min_ent, ...
              min_ent_M, min_ent_s, ...
