@@ -4,13 +4,13 @@
 % Set parameters
 
 sequence_file= 'data/data3.fasta';
-K= 18;
+%K= 20 ;
 n_iterations= 2000;
 burn_in= 1000;
-% a = 0.1;
-mu_start = 0.8;
+a = 0.1;
+mu_start = 1;
 mu_unknown = 1;
-beta= [2,4];
+beta= [1,1];
 
 
 % Find the motifs by running the Gibbs sampler
@@ -22,12 +22,13 @@ max_lr_Ms = {};
 posterior_mean_Ms = {};
 informations = {};
 
-for mu_start = 0.8%[0.3, 0.5, 0.8, 1]
+for mu_start = [0.3, 0.5, 0.8, 1]
 for K=[18]
 
 % for K=5:15
 
-for a=[0.05, 0.1, 0.2, 1, 2, 15]
+for a=[a]%[0.05, 0.1, 0.2, 1, 2, 15]
+
 
   [ Z, S, mu, max_lr, min_ent, ...
              min_ent_M, min_ent_s, ...
@@ -45,7 +46,7 @@ for a=[0.05, 0.1, 0.2, 1, 2, 15]
 
 
   % figure();,
-  [figure_handle,~] = seqlogo_fig1(max_lr_M);
+  [figure_handle,~] = seqlogo_fig1(posterior_mean_M);
   figure_handle.Name = ['a =', num2str(a),', K =', num2str(K),...
       ', burn_in =', num2str(burn_in), ', n_iterations =', num2str(n_iterations), ...
       ', mu_start =', num2str(mu_start), ', mu_unknown =', num2str(mu_unknown), ...
@@ -61,8 +62,8 @@ for a=[0.05, 0.1, 0.2, 1, 2, 15]
       ', sequence\_file =', sequence_file, ', beta =', num2str(beta)]);
   ylabel('Average information per site')
   xlabel('Iteration')
-
-
+  
+  
     figure();
 bar(mean(Z(:,burn_in:end),2))
   title(['Parameter values: a =', num2str(a),', K =', num2str(K),...
@@ -71,7 +72,7 @@ bar(mean(Z(:,burn_in:end),2))
       ', sequence\_file =', sequence_file, ', beta =', num2str(beta)]);
   ylabel('Probability that the sequence is selected')
   xlabel('Sequence number')
-
+  
   % plot(mu)
   % xlabel('iteration')
   % ylabel('\mu')

@@ -1,9 +1,9 @@
 function [ Z, S, mu, max_lr, min_ent, ...
            min_ent_M, min_ent_s, ...
            max_lr_M,max_lr_s, ...
-           posterior_mean_M, information,background ]  = find_motifs(sequence_file,K, ...
+           posterior_mean_M, information,background ]  = find_motifs_phylo(sequence_file,K, ...
                                                       n_iterations,burn_in, ...
-                                                      a, mu_start, mu_unknown, beta)
+                                                      a, mu_start, mu_unknown, beta,Kave)
 
 % This code will run the Gibbs sampler motif detection algorithm of
 % Lawrence et al. (1993) on a set of sequences inputted as a FASTA file.
@@ -92,7 +92,22 @@ posterior_mean_M = zeros(4,K);
 background_M = repmat(background,1,K);
 % This is a background PWM derived from the inputted background
 % frequencies.
-
+M=sample_M(seqs,K,z,s,alpha); %initial M
+K_old = K;
+f_old = get_counts(seqs,K,z,s,alpha);
+L_max=0;
+for i=1:length(seqs)
+  if length(seqs{i}) > L_max;
+    L_max = length(seqs{i});
+  end
+end
+L_min=L_max;
+for i=1:length(seqs)
+  if length(seqs{i}) < L_min
+    L_min = length(seqs{i});
+  end
+end
+L_min
 for (iter = 1:n_iterations)
     if (mod(iter,10)==0) % Every ten iterations
         iter
@@ -113,11 +128,52 @@ for (iter = 1:n_iterations)
     for (i = 1:nseqs) % For each sequence
 
         L_i = length(seqs{i});
-
-        M = sample_M(seqs,K,z,s,alpha);
+        K_new=geornd(1/K)+1;
+        K_max = L_max;
+        for jj=1:length(seqs)
+          if length(seqs{jj})-s(jj) +1 < K_max
+            K_max = length(seqs{jj})-s(jj) +1;
+          end
+        end
+        K_max
+        while K_new >  K_max
+          K_new=geornd(1/K)+1;
+        end
+        K_new
+        M_new = sample_M(seqs,K_new,z,s,alpha);
         % Compute the current PWM for the motif from all sequences.
         % M will be a 4 x K array giving the probability of
         % each base at each location along the motif.
+
+        % compute the probability ratio needed for Metropolis-Hastings part of algo (see nihms paper)
+        f = get_counts(seqs,K_new,z,s,alpha);
+        ratio = 1;
+        for kk=1:K_new
+          for nuc=1:4
+            ratio=ratio*(1/M_new(nuc,kk)^(f(nuc,kk)-1));
+          end
+        end
+
+        for kk=1:K_old
+          % kk
+          % M
+          % f_old
+          for nuc=1:4
+            ratio=ratio*(M(nuc,kk)^(f_old(nuc,kk)-1));
+          end
+        end
+
+        % for ii=1:nseqs
+          ratio = ratio*(likelihood(seqs{i},s(i),M_new,K_new)/likelihood(seqs{i},s(i),M,K));
+        % end
+
+        rr = rand(1);
+        if (rr < min(1,ratio))
+          M = M_new;
+          K_old = K;
+          K = K_new;
+          f_old = f;
+        end
 
         prob = zeros(L_i-K+1,1);
         background_prob = zeros(L_i-K+1,1);
@@ -198,28 +254,32 @@ function [ background ] = compute_background(seqs)
 
 end
 
-function [ M ] = sample_M(seqs,K,z,s,alpha)
-f = zeros(4,K);
-M = zeros(4,K);
-% for each sequence
-for i=1:length(seqs)
-  seq = seqs{i};
-  % if I found the motif
-  if z(i)==1
+function ff = get_counts(seqs,K,z,s,alpha)
+  ff = zeros(4,K);
+  % for each sequence
+  for i=1:length(seqs)
+    seq = seqs{i};
+    % if I found the motif
+    if z(i)==1
       % for each position in sequence
-    for k=1:K
-      j=k+s(i)-1;
-
-      % add one occurrence to the occurrence count
-      f(seq(j),k) = f(seq(j),k) + 1;
+      for k=1:K
+        j=k+s(i)-1;
+        % add one occurrence to the occurrence count
+        ff(seq(j),k) = ff(seq(j),k) + 1;
+      end
     end
   end
 end
+
+function [ M ] = sample_M(seqs,K,z,s,alpha)
+f = get_counts(seqs,K,z,s,alpha);
+M = zeros(4,K);
 for k=1:K
   M(:,k) = dirichrnd(alpha+f(:,k)');
 end
 
 end
+
 
 function [ likelihood_ratio, s_i ] =  sample_s(prob,background_prob,mu,K)
 % 'prob' and 'background_prob' are vectors containing the
@@ -237,8 +297,8 @@ L = length(prob);
 likelihood_ratio = prob./background_prob;
 
 prob_z=(L-K+1)*(1-mu)/((L-K+1)*(1-mu)+mu*sum(likelihood_ratio));
-
-if (rand(1) < prob_z)
+r = rand(1);
+if (r < prob_z)
   s_i=0;
   likelihood_ratio = 1;
 else

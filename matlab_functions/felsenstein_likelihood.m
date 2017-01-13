@@ -1,5 +1,5 @@
 function prob = felsenstein_likelihood(seq,start_positions,k,p)
-
+start_positions;
 % Mar. 2013
 % Joe Herman <herman@stats.ox.ac.uk>
 % Adam Novak <novak@stats.ox.ac.uk>
