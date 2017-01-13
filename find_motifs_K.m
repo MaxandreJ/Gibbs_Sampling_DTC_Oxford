@@ -1,9 +1,9 @@
-function [ Z, S, mu, max_lr, min_ent, ...
+function [ Z, S, mu, max_lr, min_ent, max_lr_K, min_ent_K, ...
            min_ent_M, min_ent_s, ...
            max_lr_M,max_lr_s, ...
-           posterior_mean_M, information,background ]  = find_motifs_phylo(sequence_file,K, ...
+           information,background ]  = find_motifs_phylo(sequence_file,Kave, ...
                                                       n_iterations,burn_in, ...
-                                                      a, mu_start, mu_unknown, beta,Kave)
+                                                      a, mu_start, mu_unknown, beta)
 
 % This code will run the Gibbs sampler motif detection algorithm of
 % Lawrence et al. (1993) on a set of sequences inputted as a FASTA file.
@@ -65,12 +65,12 @@ S = ones(nseqs,n_iterations);
 %Random starting position
 for (i = 1:nseqs) % For each sequence
     L_i = length(seqs{i});
-    s(i) = randi([1,L_i-K+1],1);
+    s(i) = randi([1,L_i-Kave+1],1);
     S(:,i) = s(i);
 end
 
 min_ent = Inf; % Keep a record of the minimum PWM entropy
-min_ent_M = zeros(4,K); % And the corresponding PWM
+min_ent_M = zeros(4,Kave); % And the corresponding PWM
 min_ent_s = ones(nseqs,1); % and starting positions
 background_entropy = -sum(background .* log(background));
 entropy = zeros(n_iterations,1);
@@ -78,23 +78,24 @@ entropy = zeros(n_iterations,1);
 % PWM and starting positions for the minimum entropy PWM.
 
 max_lr = 0; % The maximum observed likelihood ratio
-max_lr_M = zeros(4,K);
+max_lr_M = zeros(4,Kave);
 max_lr_s = ones(nseqs,1);
 lr = ones(n_iterations,1); % Record the likelihood ratio
 % The above variables are used for the purposes of finding the PWM that
 % maximises the likelihood ratio between the motif model and the random
 % background model, as described in the accompanying explanatory document.
 
-posterior_mean_M = zeros(4,K);
+posterior_mean_M = zeros(4,Kave);
 % The posterior mean PWM is updated once the Gibbs sampler has converged
 % i.e. after the burn_in is over.
 
-background_M = repmat(background,1,K);
+background_M = repmat(background,1,Kave);
 % This is a background PWM derived from the inputted background
 % frequencies.
-M=sample_M(seqs,K,z,s,alpha); %initial M
+M=sample_M(seqs,Kave,z,s,alpha); %initial M
+K = Kave;
 K_old = K;
-f_old = get_counts(seqs,K,z,s,alpha);
+f_old = get_counts(seqs,Kave,z,s,alpha);
 L_max=0;
 for i=1:length(seqs)
   if length(seqs{i}) > L_max;
@@ -107,7 +108,8 @@ for i=1:length(seqs)
     L_min = length(seqs{i});
   end
 end
-L_min
+
+
 for (iter = 1:n_iterations)
     if (mod(iter,10)==0) % Every ten iterations
         iter
@@ -128,18 +130,18 @@ for (iter = 1:n_iterations)
     for (i = 1:nseqs) % For each sequence
 
         L_i = length(seqs{i});
-        K_new=geornd(1/K)+1;
+        K_new=geornd(1/Kave)+1;
         K_max = L_max;
         for jj=1:length(seqs)
           if length(seqs{jj})-s(jj) +1 < K_max
             K_max = length(seqs{jj})-s(jj) +1;
           end
         end
-        K_max
+        % K_max
         while K_new >  K_max
-          K_new=geornd(1/K)+1;
+          K_new=geornd(1/Kave)+1;
         end
-        K_new
+        % K_new
         M_new = sample_M(seqs,K_new,z,s,alpha);
         % Compute the current PWM for the motif from all sequences.
         % M will be a 4 x K array giving the probability of
@@ -154,10 +156,9 @@ for (iter = 1:n_iterations)
           end
         end
 
-        for kk=1:K_old
+
+        for kk=1:K
           % kk
-          % M
-          % f_old
           for nuc=1:4
             ratio=ratio*(M(nuc,kk)^(f_old(nuc,kk)-1));
           end
@@ -170,10 +171,11 @@ for (iter = 1:n_iterations)
         rr = rand(1);
         if (rr < min(1,ratio))
           M = M_new;
-          K_old = K;
           K = K_new;
           f_old = f;
         end
+
+        background_M = repmat(background,1,K);
 
         prob = zeros(L_i-K+1,1);
         background_prob = zeros(L_i-K+1,1);
@@ -207,7 +209,7 @@ for (iter = 1:n_iterations)
 
     if (iter > burn_in)
         % i.e. if the chain has converged to the stationary distribution
-        posterior_mean_M = posterior_mean_M + M/(n_iterations-burn_in);
+        % posterior_mean_M = posterior_mean_M + M/(n_iterations-burn_in);
     end
     % Now update the min entropy and max likelihood ratio PWMs etc.
     entropy(iter) = mean(-sum(M .* log(M))); % Mean entropy per site
@@ -215,11 +217,13 @@ for (iter = 1:n_iterations)
         min_ent = entropy(iter);
         min_ent_M = M;
         min_ent_s = s;
+        min_ent_K = K;
     end
     if (iter > 1 && lr(iter) > max_lr)
         max_lr = lr(iter);
         max_lr_M = M;
         max_lr_s = s;
+        max_lr_K = K;
     end
     % Store the last values:
     Z(:,iter) = z;
@@ -328,7 +332,6 @@ function [ p ] = likelihood(sequence,s_i,M,K)
 		p=1;
 
 		for (j = s_i:s_i+K-1) % from the starting point of the motif to its end
-
 			p = p*M(sequence(j),j-s_i+1);
 			% multiply p by the probability of the nucleotide 'sequence(j)' being at position
 			% 'j-s_i+1'. When j=s_i, j-s_i+1 = 1, which is good because

@@ -1,19 +1,21 @@
-sequence_file= 'data/data2.fasta';
-K= 11;
-n_iterations= 10000;
-burn_in= 2000;
+sequence_file= 'data/data4.fasta';
+K= 15;
+n_iterations= 15000;
+burn_in= 8000;
 % a = 0.1;
 mu_start = 1;
 mu_unknown = 0;
 beta= [1,1];
 
-for a=[0.1]
+for a=[0.2]
 
 %%task4
-% [ Z, S, mu, max_lr, min_ent, min_ent_M, min_ent_s, max_lr_M,max_lr_s, posterior_mean_M, information,background ]  = find_motifs_phylo(sequence_file,K,n_iterations,burn_in, a, mu_start, mu_unknown, beta)
+[ Z, S, mu, max_lr, min_ent, min_ent_M, min_ent_s, max_lr_K,min_ent_K, posterior_mean_M, information,background ]  = find_motifs_phylo(sequence_file,K,n_iterations,burn_in, a, mu_start, mu_unknown, beta)
 
 %%task5
-[ Z, S, mu, max_lr, min_ent, min_ent_M, min_ent_s, max_lr_M,max_lr_s, posterior_mean_M, information,background ]  = find_motifs_K(sequence_file,K,n_iterations,burn_in, a, mu_start, mu_unknown, beta)
+% [ Z, S, mu, max_lr, min_ent, min_ent_M, min_ent_s, max_lr_M,max_lr_s, max_lr_K, min_ent_K, information,background ]  = find_motifs_K(sequence_file,K,n_iterations,burn_in, a, mu_start, mu_unknown, beta)
+
+% [ Z, S, mu, max_lr, min_ent, min_ent_M, min_ent_s, max_lr_M,max_lr_s, information,background ]  = find_motifs(sequence_file,K,n_iterations,burn_in, a, mu_start, mu_unknown, beta)
 
 
 figure();
