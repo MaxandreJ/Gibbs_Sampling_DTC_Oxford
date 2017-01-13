@@ -1,0 +1,14 @@
+p(s|M,X,G)=\frac{p(X^{(1)},...,X^{(N)}|s,M,G)p(s)}{p(X^{(1)},...,X^{(N)}|M,G)}
+
+
+p(X^{(1)},...,X^{(N)}|s,M,G)=\prod_{i=1}^N\prod_{j=1}^{s_i-1}p(X_j^{(i)}|G)\prod_{j=s_i}^{s_i+K-1}p(X_j^{(i)}|M)\prod_{j=s_i+K}^{L_i}p(X_j^{(i)}|G)
+
+p(s|M,X,G)=\prod _{i=1}^N \frac{\prod _{j=1}^{s_i-1}p(X_j^{(i)}|G)\prod _{j=s_i}^{s_i+K-1}p(X_j^{(i)}|M)\prod _{j=s_i+K}^{L_i}p(X_j^{(i)}|G)p(s)}{\sum _{s_i=1}^{L_i}\prod _{j=1}^{s_i-1}p(X_j^{(i)}|G)\prod _{j=s_i}^{s_i+K-1}p(X_j^{(i)}|M)\prod _{j=s_i+K}^{L_i}p(X_j^{(i)}|G)}
+
+p(s|M,X,G)=\prod _{i=1}^N \frac{\prod _{j=1}^{s_i-1}p(X_j^{(i)}|G)\frac{\prod _{j=s_i}^{s_i+K-1}p(X_j^{(i)}|M)}{\prod _{j=s_i}^{s_i+K-1}p(X_j^{(i)}|G)}\prod _{j=s_i+K}^{L_i}p(X_j^{(i)}|G)p(s)\prod _{j=s_i}^{s_i+K-1}p(X_j^{(i)}|G)}{\sum _{s_i=1}^{L_i}\prod _{j=1}^{s_i-1}p(X_j^{(i)}|G)\frac{\prod _{j=s_i}^{s_i+K-1}p(X_j^{(i)}|M)}{\prod _{j=s_i}^{s_i+K-1}p(X_j^{(i)}|G)}\prod _{j=s_i+K}^{L_i}p(X_j^{(i)}|G)p(s)\prod _{j=s_i}^{s_i+K-1}p(X_j^{(i)}|G)}
+
+
+p(s\mid M,X,G)=\prod _{i=1}^N\frac{\prod _{j=1}^{L_i}p(X_j^{(i)}\mid G)\frac{\prod _{j=s_i}^{s_i+K-1}p(X_j^{(i)}\mid M)}{\prod _{j=s_i}^{s_i+K-1}p(X_j^{(i)}\mid G)}}{\sum _{s_i=1}^{L_i}\prod _{j=1}^{L_i}p(X_j^{(i)}\mid G)\frac{\prod _{j=s_i}^{s_i+K-1}p(X_j^{(i)}\mid M)}{\prod _{j=s_i}^{s_i+K-1}p(X_j^{(i)}\mid G)}}
+
+
+p(s\mid M,X,G)=\prod _{i=1}^N\frac{\frac{\prod _{j=s_i}^{s_i+K-1}p(X_j^{(i)}\mid M)}{\prod _{j=s_i}^{s_i+K-1}p(X_j^{(i)}\mid G)}}{\sum _{s_i=1}^{L_i}\frac{\prod _{j=s_i}^{s_i+K-1}p(X_j^{(i)}\mid M)}{\prod _{j=s_i}^{s_i+K-1}p(X_j^{(i)}\mid G)}}

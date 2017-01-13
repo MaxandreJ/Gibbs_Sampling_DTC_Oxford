@@ -46,6 +46,9 @@ prior = p; % stationary dist
 % characters below a particular internal node i of the tree.
 % Returns a vector of length 4, containing the likelihoods if
 % there is an A,C,G or T at node i.
+% MODEL:
+% We assume the motif now represents the (probability dist) of
+% an ancestral motif from which all current observations are derived
 function [ x ] = fels(i)
 
     if (i >= nseqs)
